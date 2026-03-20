@@ -15,7 +15,8 @@ def validate_python(file_path):
         return False
 
 def main():
-    file_path = "../code_snippets/Python/snippet.py"
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    file_path = os.path.join(base_dir, "code_snippets", "Python", "snippet.py")
 
     if not os.path.exists(file_path):
         print("No snippet found.")
