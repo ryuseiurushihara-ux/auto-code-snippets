@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Auto Code Generator</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin-top: 40px;
+}
+select, button {
+  padding: 8px;
+  margin: 5px;
+}
+pre {
+  text-align: left;
+  background: #111;
+  color: #0f0;
+  padding: 15px;
+  width: 80%;
+  margin: auto;
+  overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Auto Code Generator</h1>
+
+<!-- 言語 -->
+<select id="language">
+  <option value="python">Python</option>
+  <option value="js">JavaScript</option>
+</select>
+
+<!-- 用途 -->
+<select id="task">
+  <option value="api">API取得</option>
+  <option value="json">JSON処理</option>
+  <option value="file">ファイル読み込み</option>
+</select>
+
+<br>
+
+<button onclick="generate()">生成</button>
+<button onclick="download()">ダウンロード</button>
+<button onclick="copy()">コピー</button>
+
+<pre id="output"></pre>
+
+<script>
+
+function generate() {
+  const lang = document.getElementById("language").value;
+  const task = document.getElementById("task").value;
+
+  let code = "";
+
+  if (lang === "python") {
+
+    if (task === "api") {
+      code = `import requests
+
+url = "https://api.github.com"
+response = requests.get(url)
+
+if response.status_code == 200:
+    print(response.json())
+else:
+    print("Error:", response.status_code)`;
+    }
+
+    if (task === "json") {
+      code = `import json
+
+json_string = '{"name":"Alice","age":25}'
+data = json.loads(json_string)
+
+print(data["name"])
+print(data["age"])`;
+    }
+
+    if (task === "file") {
+      code = `with open("sample.txt", "r") as f:
+    print(f.read())`;
+    }
+  }
+
+  if (lang === "js") {
+
+    if (task === "api") {
+      code = `fetch("https://api.github.com")
+  .then(res => res.json())
+  .then(data => console.log(data));`;
+    }
+
+    if (task === "json") {
+      code = `const data = JSON.parse('{"name":"Alice","age":25}');
+console.log(data.name);
+console.log(data.age);`;
+    }
+
+    if (task === "file") {
+      code = `const fs = require("fs");
+fs.readFile("sample.txt","utf8",(e,d)=>console.log(d));`;
+    }
+  }
+
+  document.getElementById("output").textContent = code;
+}
+
+function download() {
+  const code = document.getElementById("output").textContent;
+  const blob = new Blob([code], { type: "text/plain" });
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "snippet.txt";
+  a.click();
+}
+
+function copy() {
+  const code = document.getElementById("output").textContent;
+  navigator.clipboard.writeText(code);
+  alert("コピーしました");
+}
+
+</script>
+
+</body>
+</html>
