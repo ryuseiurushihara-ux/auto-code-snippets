@@ -9,10 +9,21 @@ body {
   font-family: sans-serif;
   text-align: center;
   margin-top: 40px;
+  background: #f5f5f5;
+}
+h1 {
+  margin-bottom: 10px;
+}
+p {
+  color: #555;
 }
 select, button {
-  padding: 8px;
+  padding: 10px;
   margin: 5px;
+  font-size: 14px;
+}
+button {
+  cursor: pointer;
 }
 pre {
   text-align: left;
@@ -20,8 +31,14 @@ pre {
   color: #0f0;
   padding: 15px;
   width: 80%;
-  margin: auto;
+  margin: 20px auto;
   overflow-x: auto;
+  border-radius: 10px;
+  min-height: 120px;
+}
+#status {
+  margin-top: 10px;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -30,14 +47,25 @@ pre {
 
 <h1>Auto Code Generator</h1>
 
+<p>
+① 言語と用途を選択<br>
+② 「コード生成」をクリック<br>
+③ コピーまたはダウンロードして使用
+</p>
+
+<!-- 状態表示 -->
+<p id="status">未選択</p>
+
 <!-- 言語 -->
-<select id="language">
+<select id="language" onchange="updateStatus()">
+  <option value="">言語を選択</option>
   <option value="python">Python</option>
   <option value="js">JavaScript</option>
 </select>
 
 <!-- 用途 -->
-<select id="task">
+<select id="task" onchange="updateStatus()">
+  <option value="">用途を選択</option>
   <option value="api">API取得</option>
   <option value="json">JSON処理</option>
   <option value="file">ファイル読み込み</option>
@@ -45,17 +73,35 @@ pre {
 
 <br>
 
-<button onclick="generate()">生成</button>
+<button onclick="generate()">コード生成</button>
 <button onclick="download()">ダウンロード</button>
 <button onclick="copy()">コピー</button>
 
-<pre id="output"></pre>
+<pre id="output">ここにコードが表示されます</pre>
 
 <script>
+
+function updateStatus() {
+  const lang = document.getElementById("language").value;
+  const task = document.getElementById("task").value;
+
+  if (!lang || !task) {
+    document.getElementById("status").textContent = "未選択";
+    return;
+  }
+
+  document.getElementById("status").textContent =
+    `言語: ${lang} / 用途: ${task}`;
+}
 
 function generate() {
   const lang = document.getElementById("language").value;
   const task = document.getElementById("task").value;
+
+  if (!lang || !task) {
+    alert("言語と用途を選択してください");
+    return;
+  }
 
   let code = "";
 
@@ -94,7 +140,8 @@ print(data["age"])`;
     if (task === "api") {
       code = `fetch("https://api.github.com")
   .then(res => res.json())
-  .then(data => console.log(data));`;
+  .then(data => console.log(data))
+  .catch(err => console.error("Error:", err));`;
     }
 
     if (task === "json") {
@@ -105,27 +152,50 @@ console.log(data.age);`;
 
     if (task === "file") {
       code = `const fs = require("fs");
-fs.readFile("sample.txt","utf8",(e,d)=>console.log(d));`;
+
+fs.readFile("sample.txt","utf8",(err,data)=>{
+  if(err){
+    console.log("Error:", err);
+  } else {
+    console.log(data);
+  }
+});`;
     }
   }
 
   document.getElementById("output").textContent = code;
+  alert("コード生成完了");
 }
 
 function download() {
   const code = document.getElementById("output").textContent;
-  const blob = new Blob([code], { type: "text/plain" });
 
+  if (!code || code === "ここにコードが表示されます") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const blob = new Blob([code], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "snippet.txt";
+
+  let ext = (document.getElementById("language").value === "python") ? ".py" : ".js";
+  a.download = "snippet" + ext;
+
   a.click();
 }
 
 function copy() {
   const code = document.getElementById("output").textContent;
-  navigator.clipboard.writeText(code);
-  alert("コピーしました");
+
+  if (!code || code === "ここにコードが表示されます") {
+    alert("先に生成してください");
+    return;
+  }
+
+  navigator.clipboard.writeText(code)
+    .then(() => alert("コピー完了"))
+    .catch(() => alert("コピー失敗"));
 }
 
 </script>
